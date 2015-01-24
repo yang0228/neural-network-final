@@ -69,7 +69,6 @@ print("Total = %s" % time_total)
 print(nn.step_size)
 
 
-
 # print("Training model")
 # nn = NeuralNetwork(N_INPUTS,N_OUTPUTS,N_NEURONS,N_LAYERS)
 
