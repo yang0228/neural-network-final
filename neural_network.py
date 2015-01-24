@@ -6,7 +6,6 @@ class NeuralNetwork:
 
     """
     A Neural Network implementation with back propagation
-    Ben Schroeter
     """
     
     def __init__(self,n_inputs,n_outputs,n_neurons,n_hidden_layers,n_steps,step_size,step_decay,weight_bound,bias_bound):

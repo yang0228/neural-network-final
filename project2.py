@@ -19,8 +19,7 @@ def get_timestamp():
     return str(raw.year) + str(raw.month) + str(raw.day) + "-" + str(raw.hour) + str(raw.minute)
 
 print("COMP90051 - Statistical and Evolutionary Learning\n"
-      "Project 2 - Neural Networks\n\n"
-      "Ben Schroeter #657449\nQingyang Hong #629379\n\n")
+      "Project 2 - Neural Networks\n\n")
 
 print("1. Loading data")
 data = pd.read_csv("data/train.csv",header=None)

@@ -52,7 +52,7 @@ gau = GeneticAlgorithmUtility(
 print("COMP90051 - Statistical and Evolutionary Learning\n"
       "Project 2 - Neural Networks\n"
       "Part 2 - Genetic Algorithm\n\n"
-      "Ben Schroeter #657449\nQingyang Hong #629379\n")
+      )
 
 print("Loading data...")
 data = pd.read_csv("data/train.csv",header=None)

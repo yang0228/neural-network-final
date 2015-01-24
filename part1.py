@@ -75,7 +75,6 @@ print(nn.step_size)
 
 # print("COMP90051 - Statistical and Evolutionary Learning\n"
 #       "Project 2 - Neural Networks\n\n"
-#       "Ben Schroeter #657449\nQingyang Hong #629379\n\n")
 #
 # print("1. Loading data")
 # data = pd.read_csv("data/train.csv",header=None)
