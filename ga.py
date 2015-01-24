@@ -3,6 +3,10 @@ from neural_network import NeuralNetwork
 
 class GeneticAlgorithmUtility:
 
+    """
+    A utility to manage the aspects of the Genetic Algorithm
+    """
+
     def __init__(self,
                  n_inputs,n_outputs,
                  max_neurons,min_neurons,
@@ -11,7 +15,8 @@ class GeneticAlgorithmUtility:
                  max_step_size,min_step_size,
                  max_step_decay,min_step_decay,
                  max_weight_bound,min_weight_bound,
-                 max_bias_bound,min_bias_bound
+                 max_bias_bound,min_bias_bound,
+                 max_momentum,min_momentum
     ):
         """
         Constructor
@@ -43,6 +48,8 @@ class GeneticAlgorithmUtility:
         self.min_weight_bound = min_weight_bound
         self.max_bias_bound = max_bias_bound
         self.min_bias_bound = min_bias_bound
+        self.max_momentum = max_momentum
+        self.min_momentum = min_momentum
 
     def random_network(self):
         """
@@ -58,20 +65,21 @@ class GeneticAlgorithmUtility:
             random.uniform(self.min_step_size,self.max_step_size),
             random.uniform(self.min_step_decay,self.max_step_decay),
             random.uniform(self.min_weight_bound,self.max_weight_bound),
-            random.uniform(self.min_bias_bound,self.max_bias_bound)
+            random.uniform(self.min_bias_bound,self.max_bias_bound),
+            random.uniform(self.min_momentum,self.max_momentum)
         )
 
     def encode_network(self,nn):
         """
         Produces a genotype for the network
         """
-        return [nn.n_inputs,nn.n_outputs,nn.n_neurons,nn.n_hidden_layers,nn.n_steps,nn.step_size,nn.step_decay,nn.weight_bound,nn.bias_bound]
+        return [nn.n_inputs,nn.n_outputs,nn.n_neurons,nn.n_hidden_layers,nn.n_steps,nn.step_size,nn.step_decay,nn.weight_bound,nn.bias_bound,nn.momentum]
 
     def decode_network(self,g):
         """
         Produces a network (phenotype) from a genotype
         """
-        return NeuralNetwork(g[0],g[1],g[2],g[3],g[4],g[5],g[6],g[7],g[8])
+        return NeuralNetwork(g[0],g[1],g[2],g[3],g[4],g[5],g[6],g[7],g[8],g[9])
 
     def combine(self,ga,gb):
         """
@@ -119,5 +127,9 @@ class GeneticAlgorithmUtility:
         # bias bound
         elif mutation == 8:
             gc[8] = random.uniform(self.min_bias_bound,self.max_bias_bound)
+
+        # momentum
+        elif mutation == 9:
+            gc[9] = random.uniform(self.min_momentum,self.max_momentum)
 
         return gc

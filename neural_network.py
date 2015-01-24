@@ -8,7 +8,14 @@ class NeuralNetwork:
     A Neural Network implementation with back propagation
     """
     
-    def __init__(self,n_inputs,n_outputs,n_neurons,n_hidden_layers,n_steps,step_size,step_decay,weight_bound,bias_bound):
+    def __init__(self,
+                 n_inputs,n_outputs,
+                 n_neurons,
+                 n_hidden_layers,
+                 n_steps,step_size,step_decay,
+                 weight_bound,bias_bound,
+                 momentum
+    ):
         """
         Constructor - sets internal properties and initialises weights and biases
         :param n_inputs:
@@ -34,6 +41,9 @@ class NeuralNetwork:
         self.biases = []
         self.activations = []
         self.activations_d = []
+
+        self.weight_deltas = []
+        self.momentum = momentum
         
         self._initialise_weights_and_bias()
         
@@ -59,6 +69,9 @@ class NeuralNetwork:
         # hidden to output
         self.weights.append(np.random.uniform(-self.weight_bound,self.weight_bound,(self.n_neurons,self.n_outputs)))
         self.biases.append(np.random.uniform(-self.bias_bound,self.bias_bound,(self.n_outputs,1)))
+
+        # weight deltas (of momentum)
+        self.weight_deltas = [None for x in range(0,self.n_layers)]
         
     def activation(self,x):
         """
@@ -86,7 +99,7 @@ class NeuralNetwork:
         
     def prepare_instance(self,instance,n_labels):
         """
-        Prepares an instance for use with the model
+        Prepares an instance for use with the model (from an array as expected)
         :param instance:
         :param n_labels:
         :return:
@@ -120,23 +133,22 @@ class NeuralNetwork:
 
             weights = self.weights[i]
             biases = self.vectorise(self.biases[i])
-
+            # signal is from the last layer of activations 
             signal = self.activations[-1]
             signal = la.dot(signal.T,weights)
             signal = la.add(signal.T,biases)
 
-            # dropout regularisation - ruined performance
-            dropout_vector = self.dropout_vector(len(signal),0.5)
+            # dropout regularisation on all layers bar the last
+            if (i < self.n_hidden_layers):
+                dropout_vector = self.dropout_vector(len(signal),0.20)
+            else:
+                dropout_vector = 1
 
             activation = self.vectorise(np.array([self.activation(x[0]) for x in signal]))
-            # print(activation)
-            # activation = la.multiply(activation,dropout_vector)
-            # print(activation)
-            # exit()
-            self.activations.append(activation)
-
+            activation = la.multiply(activation,dropout_vector)
             activation_d = self.vectorise(np.array([self.activation_d(x[0]) for x in activation]))
-            # activation_d = la.multiply(activation_d,dropout_vector)
+            activation_d = la.multiply(activation_d,dropout_vector)
+            self.activations.append(activation)
             self.activations_d.append(activation_d)
     
     def back_propagate(self,actual,step):
@@ -162,6 +174,13 @@ class NeuralNetwork:
 
             # update the weights (previous activation^T x delta
             weight_delta = la.multiply(prev_activations.T,delta) # matrix
+
+            # momentum
+            if self.weight_deltas[i] is not None:
+                weight_delta = la.add(weight_delta,la.multiply(self.momentum,self.weight_deltas[i]))
+
+            self.weight_deltas[i] = weight_delta
+
             self.weights[i-1] = np.subtract(self.weights[i-1],la.multiply(step,weight_delta).T)
 
             # calculate new delta
@@ -240,15 +259,17 @@ class NeuralNetwork:
 
         total = 0.0
         correct = 0.0
+        rmse = 0.0
 
         for x in range(0,len(data)):
             inputs, outputs, label = self.prepare_instance(data[x],self.n_outputs)
             prediction, max_score, activations = self.predict(inputs)
             total += 1.0
+            rmse += (prediction - label)**2
             if prediction - label == 0:
                 correct += 1.0
 
-        return correct/total
+        return correct/total, (rmse/float(len(data)))**0.5
 
     def dropout_vector(self,length,p):
         """
