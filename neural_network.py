@@ -29,7 +29,7 @@ class NeuralNetwork:
         self.n_neurons = n_neurons
         self.n_hidden_layers = n_hidden_layers
         self.n_layers = n_hidden_layers + 2
-        self.n_steps = n_steps
+        self.n_steps = n_steps #training for n_steps loop
         self.step_size = step_size
         self.step_decay = step_decay
 
@@ -133,19 +133,22 @@ class NeuralNetwork:
 
             weights = self.weights[i]
             biases = self.vectorise(self.biases[i])
-            # signal is from the last layer of activations 
+            # newest signal is from the last layer of activations vector
             signal = self.activations[-1]
             signal = la.dot(signal.T,weights)
             signal = la.add(signal.T,biases)
+	    #print "signal shape:", signal.shape -> (100,1) or (10,1) 
 
-            # dropout regularisation on all layers bar the last
+            # dropout regularisation on all layers but the last
             if (i < self.n_hidden_layers):
                 dropout_vector = self.dropout_vector(len(signal),0.20)
             else:
                 dropout_vector = 1
-
+	    # here signal.shape is (n,1)
             activation = self.vectorise(np.array([self.activation(x[0]) for x in signal]))
+	    #print "activation shape:",activation.shape -> (100,1) or (10, 1)
             activation = la.multiply(activation,dropout_vector)
+	    #print "activation shape:",activation.shape -> (100,1) or (10, 1)
             activation_d = self.vectorise(np.array([self.activation_d(x[0]) for x in activation]))
             activation_d = la.multiply(activation_d,dropout_vector)
             self.activations.append(activation)
@@ -155,7 +158,7 @@ class NeuralNetwork:
         """
         Back-propagates the network, gradient descent
         :param actual:
-        :param step:
+        :param step: step_size(learning rate)
         :return:
         """
         delta = self.activations[-1] - actual
@@ -174,7 +177,8 @@ class NeuralNetwork:
 
             # update the weights (previous activation^T x delta
             weight_delta = la.multiply(prev_activations.T,delta) # matrix
-
+	    #print "weight_delta:", weight_delta.shape 
+	    #-> (10,100), (100,25)
             # momentum
             if self.weight_deltas[i] is not None:
                 weight_delta = la.add(weight_delta,la.multiply(self.momentum,self.weight_deltas[i]))
